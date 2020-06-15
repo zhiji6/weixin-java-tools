@@ -1,27 +1,24 @@
 package me.chanjar.weixin.cp.api;
 
 import me.chanjar.weixin.common.bean.WxJsapiSignature;
-import me.chanjar.weixin.common.bean.menu.WxMenu;
-import me.chanjar.weixin.common.bean.result.WxMediaUploadResult;
-import me.chanjar.weixin.common.exception.WxErrorException;
+import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.session.WxSession;
 import me.chanjar.weixin.common.session.WxSessionManager;
 import me.chanjar.weixin.common.util.http.MediaUploadRequestExecutor;
 import me.chanjar.weixin.common.util.http.RequestExecutor;
 import me.chanjar.weixin.common.util.http.RequestHttp;
-import me.chanjar.weixin.cp.bean.*;
+import me.chanjar.weixin.cp.bean.WxCpMaJsCode2SessionResult;
+import me.chanjar.weixin.cp.bean.WxCpMessage;
+import me.chanjar.weixin.cp.bean.WxCpMessageSendResult;
+import me.chanjar.weixin.cp.bean.WxCpProviderToken;
 import me.chanjar.weixin.cp.config.WxCpConfigStorage;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
 /**
- * 微信API的Service
+ * 微信API的Service.
+ *
+ * @author chanjaster
  */
 public interface WxCpService {
-
   /**
    * <pre>
    * 验证推送过来的消息的正确性
@@ -75,6 +72,34 @@ public interface WxCpService {
   String getJsapiTicket(boolean forceRefresh) throws WxErrorException;
 
   /**
+   * 获得jsapi_ticket,不强制刷新jsapi_ticket
+   * 应用的jsapi_ticket用于计算agentConfig（参见“通过agentConfig注入应用的权限”）的签名，签名计算方法与上述介绍的config的签名算法完全相同，但需要注意以下区别：
+   * <p>
+   * 签名的jsapi_ticket必须使用以下接口获取。且必须用wx.agentConfig中的agentid对应的应用secret去获取access_token。
+   * 签名用的noncestr和timestamp必须与wx.agentConfig中的nonceStr和timestamp相同。
+   *
+   * @see #getJsapiTicket(boolean)
+   */
+  String getAgentJsapiTicket() throws WxErrorException;
+
+  /**
+   * <pre>
+   * 获取应用的jsapi_ticket
+   * 应用的jsapi_ticket用于计算agentConfig（参见“通过agentConfig注入应用的权限”）的签名，签名计算方法与上述介绍的config的签名算法完全相同，但需要注意以下区别：
+   *
+   * 签名的jsapi_ticket必须使用以下接口获取。且必须用wx.agentConfig中的agentid对应的应用secret去获取access_token。
+   * 签名用的noncestr和timestamp必须与wx.agentConfig中的nonceStr和timestamp相同。
+   *
+   * 获得时会检查jsapiToken是否过期，如果过期了，那么就刷新一下，否则就什么都不干
+   *
+   * 详情请见：https://work.weixin.qq.com/api/doc#10029/%E8%8E%B7%E5%8F%96%E5%BA%94%E7%94%A8%E7%9A%84jsapi_ticket
+   * </pre>
+   *
+   * @param forceRefresh 强制刷新
+   */
+  String getAgentJsapiTicket(boolean forceRefresh) throws WxErrorException;
+
+  /**
    * <pre>
    * 创建调用jsapi时所需要的签名
    *
@@ -84,42 +109,6 @@ public interface WxCpService {
    * @param url url
    */
   WxJsapiSignature createJsapiSignature(String url) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpMenuService#create(WxMenu)}
-   */
-  @Deprecated
-  void menuCreate(WxMenu menu) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpMenuService#create(Integer, WxMenu)}
-   */
-  @Deprecated
-  void menuCreate(Integer agentId, WxMenu menu) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpMenuService#delete()}  }
-   */
-  @Deprecated
-  void menuDelete() throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpMenuService#delete(Integer)}
-   */
-  @Deprecated
-  void menuDelete(Integer agentId) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpMenuService#get() }
-   */
-  @Deprecated
-  WxMenu menuGet() throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpMenuService#get(Integer)}
-   */
-  @Deprecated
-  WxMenu menuGet(Integer agentId) throws WxErrorException;
 
   /**
    * <pre>
@@ -132,173 +121,11 @@ public interface WxCpService {
   WxCpMessageSendResult messageSend(WxCpMessage message) throws WxErrorException;
 
   /**
-   * @deprecated  请使用 {@link WxCpDepartmentService#create(WxCpDepart)}
-   */
-  @Deprecated
-  Integer departCreate(WxCpDepart depart) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpDepartmentService#update(WxCpDepart)}
-   */
-  @Deprecated
-  void departUpdate(WxCpDepart group) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpDepartmentService#delete(Integer)}
-   */
-  @Deprecated
-  void departDelete(Integer departId) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpDepartmentService#listAll() }
-   */
-  @Deprecated
-  List<WxCpDepart> departGet() throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpMediaService#upload(String, String, InputStream)}
-   */
-  @Deprecated
-  WxMediaUploadResult mediaUpload(String mediaType, String fileType, InputStream inputStream)
-    throws WxErrorException, IOException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpMediaService#upload(String, File)}
-   */
-  @Deprecated
-  WxMediaUploadResult mediaUpload(String mediaType, File file) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpMediaService#download(String)}
-   */
-  @Deprecated
-  File mediaDownload(String mediaId) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpUserService#authenticate(String)}
-   */
-  @Deprecated
-  void userAuthenticated(String userId) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpUserService#create(WxCpUser)}
-   */
-  @Deprecated
-  void userCreate(WxCpUser user) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpUserService#update(WxCpUser)}
-   */
-  @Deprecated
-  void userUpdate(WxCpUser user) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpUserService#delete(String...)}
-   */
-  @Deprecated
-  void userDelete(String userid) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpUserService#delete(String...)}
-   */
-  @Deprecated
-  void userDelete(String[] userids) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpUserService#getById(String)}
-   */
-  @Deprecated
-  WxCpUser userGet(String userid) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpUserService#listByDepartment(Integer, Boolean, Integer)}
-   */
-  @Deprecated
-  List<WxCpUser> userList(Integer departId, Boolean fetchChild, Integer status) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpUserService#listSimpleByDepartment(Integer, Boolean, Integer)}
-   */
-  @Deprecated
-  List<WxCpUser> departGetUsers(Integer departId, Boolean fetchChild, Integer status) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpTagService#create(String)}
-   */
-  @Deprecated
-  String tagCreate(String tagName) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpTagService#update(String, String)}
-   */
-  @Deprecated
-  void tagUpdate(String tagId, String tagName) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpTagService#delete(String)}
-   */
-  @Deprecated
-  void tagDelete(String tagId) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpTagService#listAll()}
-   */
-  @Deprecated
-  List<WxCpTag> tagGet() throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpTagService#listUsersByTagId(String)}
-   */
-  @Deprecated
-  List<WxCpUser> tagGetUsers(String tagId) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpTagService#addUsers2Tag(String, List, List)}
-   */
-  @Deprecated
-  void tagAddUsers(String tagId, List<String> userIds, List<String> partyIds) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpTagService#removeUsersFromTag(String, List)}
-   */
-  @Deprecated
-  void tagRemoveUsers(String tagId, List<String> userIds) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpOAuth2Service#buildAuthorizationUrl(String)}
-   */
-  @Deprecated
-  String oauth2buildAuthorizationUrl(String state);
-
-  /**
-   * @deprecated  请使用 {@link WxCpOAuth2Service#buildAuthorizationUrl(String, String)}
-   */
-  @Deprecated
-  String oauth2buildAuthorizationUrl(String redirectUri, String state);
-
-  /**
-   * @deprecated  请使用 {@link WxCpOAuth2Service#getUserInfo(String)}
-   */
-  @Deprecated
-  String[] oauth2getUserInfo(String code) throws WxErrorException;
-
-  /**
-   * @deprecated  请使用 {@link WxCpOAuth2Service#getUserInfo(Integer, String)}
-   */
-  @Deprecated
-  String[] oauth2getUserInfo(Integer agentId, String code) throws WxErrorException;
-
-  /**
-   * <pre>
-   * 邀请成员关注
-   * http://qydev.weixin.qq.com/wiki/index.php?title=管理成员#.E9.82.80.E8.AF.B7.E6.88.90.E5.91.98.E5.85.B3.E6.B3.A8
-   * </pre>
+   * 小程序登录凭证校验
    *
-   * @param userId     用户的userid
-   * @param inviteTips 推送到微信上的提示语（只有认证号可以使用）。当使用微信推送时，该字段默认为“请关注XXX企业号”，邮件邀请时，该字段无效。
-   * @return 1:微信邀请 2.邮件邀请
+   * @param jsCode 登录时获取的 code
    */
-  int invite(String userId, String inviteTips) throws WxErrorException;
+  WxCpMaJsCode2SessionResult jsCode2Session(String jsCode) throws WxErrorException;
 
   /**
    * <pre>
@@ -309,6 +136,26 @@ public interface WxCpService {
    * @return { "ip_list": ["101.226.103.*", "101.226.62.*"] }
    */
   String[] getCallbackIp() throws WxErrorException;
+
+  /**
+   * <pre>
+   * 获取服务商凭证
+   * 文档地址：https://work.weixin.qq.com/api/doc#90001/90143/91200
+   * 请求方式：POST（HTTPS）
+   * 请求地址： https://qyapi.weixin.qq.com/cgi-bin/service/get_provider_token
+   * </pre>
+   *
+   * @param corpId         服务商的corpid
+   * @param providerSecret 服务商的secret，在服务商管理后台可见
+   * @return {
+   * "errcode":0 ,
+   * "errmsg":"ok" ,
+   * "provider_access_token":"enLSZ5xxxxxxJRL",
+   * "expires_in":7200
+   * }
+   * @throws WxErrorException .
+   */
+  WxCpProviderToken getProviderToken(String corpId, String providerSecret) throws WxErrorException;
 
   /**
    * 当本Service没有实现某个API的时候，可以用这个，针对所有微信API中的GET请求
@@ -375,6 +222,13 @@ public interface WxCpService {
    * @param create 是否新建
    */
   WxSession getSession(String id, boolean create);
+
+  /**
+   * 获取WxSessionManager 对象
+   *
+   * @return WxSessionManager
+   */
+  WxSessionManager getSessionManager();
 
   /**
    * <pre>
@@ -454,8 +308,40 @@ public interface WxCpService {
    */
   WxCpUserService getUserService();
 
+  WxCpExternalContactService getExternalContactService();
+
+  /**
+   * 获取群聊服务
+   *
+   * @return 群聊服务
+   */
+  WxCpChatService getChatService();
+
+  /**
+   * 获取任务卡片服务
+   *
+   * @return 任务卡片服务
+   */
+  WxCpTaskCardService getTaskCardService();
+
+  WxCpAgentService getAgentService();
+
+  WxCpOaService getOAService();
+
   /**
    * http请求对象
    */
-  RequestHttp getRequestHttp();
+  RequestHttp<?, ?> getRequestHttp();
+
+  void setUserService(WxCpUserService userService);
+
+  void setDepartmentService(WxCpDepartmentService departmentService);
+
+  void setMediaService(WxCpMediaService mediaService);
+
+  void setMenuService(WxCpMenuService menuService);
+
+  void setOauth2Service(WxCpOAuth2Service oauth2Service);
+
+  void setTagService(WxCpTagService tagService);
 }

@@ -2,7 +2,10 @@ package com.github.binarywang.wxpay.bean.result;
 
 import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import lombok.*;
+import org.w3c.dom.Document;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -18,13 +21,31 @@ import java.util.List;
  * <li>描述
  * </pre>
  *
- * @author <a href="https://github.com/binarywang">binarywang(Binary Wang)</a>
+ * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 @XStreamAlias("xml")
-public class WxPayOrderQueryResult extends WxPayBaseResult {
+public class WxPayOrderQueryResult extends BaseWxPayResult {
+  private static final long serialVersionUID = 8241891654782412789L;
 
   /**
-   * <pre>设备号
+   * <pre>
+   * 字段名：营销详情.
+   * 变量名：promotion_detail
+   * 是否必填：否，单品优惠才有
+   * 类型：String(6000)
+   * 示例值：[{"promotion_detail":[{"promotion_id":"109519","name":"单品惠-6","scope":"SINGLE","type":"DISCOUNT","amount":5,"activity_id":"931386","wxpay_contribute":0,"merchant_contribute":0,"other_contribute":5,"goods_detail":[{"goods_id":"a_goods1","goods_remark":"商品备注","quantity":7,"price":1,"discount_amount":4},{"goods_id":"a_goods2","goods_remark":"商品备注","quantity":1,"price":2,"discount_amount":1}]}]}
+   * 描述：单品优惠专用参数，详见https://pay.weixin.qq.com/wiki/doc/api/danpin.php?chapter=9_201&index=3
+   * </pre>
+   */
+  @XStreamAlias("promotion_detail")
+  private String promotionDetail;
+
+  /**
+   * <pre>
+   * 设备号.
    * device_info
    * 否
    * String(32)
@@ -36,7 +57,8 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
   private String deviceInfo;
 
   /**
-   * <pre>用户标识
+   * <pre>
+   * 用户标识.
    * openid
    * 是
    * String(128)
@@ -48,9 +70,10 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
   private String openid;
 
   /**
-   * <pre>是否关注公众账号
+   * <pre>
+   * 是否关注公众账号.
    * is_subscribe
-   * 否
+   * 是
    * String(1)
    * Y
    * 用户是否关注公众账号，Y-关注，N-未关注，仅在公众账号类型支付有效
@@ -60,7 +83,34 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
   private String isSubscribe;
 
   /**
-   * <pre>交易类型
+   * <pre>
+   * 用户子标识	.
+   * sub_openid
+   * 否
+   * String(128)
+   * oUpF8uMuAJO_M2pxb1Q9zNjWeS6o
+   * 用户在子商户appid下的唯一标识
+   * </pre>
+   */
+  @XStreamAlias("sub_openid")
+  private String subOpenid;
+
+  /**
+   * <pre>
+   * 是否关注子公众账号.
+   * sub_is_subscribe
+   * 否
+   * String(1)
+   * Y
+   * 用户是否关注子公众账号，Y-关注，N-未关注（机构商户不返回）
+   * </pre>
+   */
+  @XStreamAlias("sub_is_subscribe")
+  private String isSubscribeSub;
+
+  /**
+   * <pre>
+   * 交易类型.
    * trade_type
    * 是
    * String(16)
@@ -72,7 +122,8 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
   private String tradeType;
 
   /**
-   * <pre>交易状态
+   * <pre>
+   * 交易状态.
    * trade_state
    * 是
    * String(32)
@@ -84,7 +135,8 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
   private String tradeState;
 
   /**
-   * <pre>付款银行
+   * <pre>
+   * 付款银行.
    * bank_type
    * 是
    * String(16)
@@ -96,7 +148,27 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
   private String bankType;
 
   /**
-   * <pre>订单金额
+   * <pre>
+   * 商品详情.
+   * detail
+   * 否
+   * String(8192)
+   * 商品详细列表，使用Json格式，传输签名前请务必使用CDATA标签将JSON文本串保护起来。如果使用了单品优惠，会有单品优惠信息返回
+   *
+   * discount_detail []：
+   * └ goods_id String 必填 32 商品的编号
+   * └ goods_name String 必填 256 商品名称
+   * └ coupon_batch_id String 必填 代金券批次ID
+   * └ coupon_id String 必填 代金卷ID
+   * └ coupon_fee Int 必填 代金券支付金额，单位为分
+   * </pre>
+   **/
+  @XStreamAlias("detail")
+  private String detail;
+
+  /**
+   * <pre>
+   * 订单金额.
    * total_fee
    * 是
    * Int
@@ -108,19 +180,8 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
   private Integer totalFee;
 
   /**
-   * <pre>应结订单金额
-   * settlement_total_fee
-   * 否
-   * Int
-   * 100
-   * 应结订单金额=订单金额-非充值代金券金额，应结订单金额<=订单金额。
-   * </pre>
-   */
-  @XStreamAlias("settlement_total_fee")
-  private Integer settlementTotalFee;
-
-  /**
-   * <pre>货币种类
+   * <pre>
+   * 货币种类.
    * fee_type
    * 否
    * String(8)
@@ -132,7 +193,21 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
   private String feeType;
 
   /**
-   * <pre>现金支付金额
+   * <pre>
+   * 应结订单金额.
+   * settlement_total_fee
+   * 否
+   * Int
+   * 100
+   * 应结订单金额=订单金额-非充值代金券金额，应结订单金额<=订单金额。
+   * </pre>
+   */
+  @XStreamAlias("settlement_total_fee")
+  private Integer settlementTotalFee;
+
+  /**
+   * <pre>
+   * 现金支付金额.
    * cash_fee
    * 是
    * Int
@@ -144,7 +219,8 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
   private Integer cashFee;
 
   /**
-   * <pre>现金支付货币类型
+   * <pre>
+   * 现金支付货币类型.
    * cash_fee_type
    * 否
    * String(16)
@@ -156,7 +232,8 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
   private String cashFeeType;
 
   /**
-   * <pre>代金券金额
+   * <pre>
+   * 代金券金额.
    * coupon_fee
    * 否
    * Int
@@ -168,7 +245,7 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
   private Integer couponFee;
 
   /**
-   * <pre>代金券使用数量
+   * <pre>代金券使用数量.
    * coupon_count
    * 否
    * Int
@@ -181,7 +258,8 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
 
   private List<Coupon> coupons;
   /**
-   * <pre>微信支付订单号
+   * <pre>
+   * 微信支付订单号.
    * transaction_id
    * 是
    * String(32)
@@ -192,7 +270,8 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
   @XStreamAlias("transaction_id")
   private String transactionId;
   /**
-   * <pre>商户订单号
+   * <pre>
+   * 商户订单号.
    * out_trade_no
    * 是
    * String(32)
@@ -202,8 +281,10 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
    */
   @XStreamAlias("out_trade_no")
   private String outTradeNo;
+
   /**
-   * <pre>附加数据
+   * <pre>
+   * 附加数据.
    * attach
    * 否
    * String(128)
@@ -213,8 +294,10 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
    */
   @XStreamAlias("attach")
   private String attach;
+
   /**
-   * <pre>支付完成时间
+   * <pre>
+   * 支付完成时间.
    * time_end
    * 是
    * String(14)
@@ -224,8 +307,10 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
    */
   @XStreamAlias("time_end")
   private String timeEnd;
+
   /**
-   * <pre>交易状态描述
+   * <pre>
+   * 交易状态描述.
    * trade_state_desc
    * 是
    * String(256)
@@ -236,160 +321,8 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
   @XStreamAlias("trade_state_desc")
   private String tradeStateDesc;
 
-  public String getDeviceInfo() {
-    return this.deviceInfo;
-  }
-
-  public void setDeviceInfo(String deviceInfo) {
-    this.deviceInfo = deviceInfo;
-  }
-
-  public String getOpenid() {
-    return this.openid;
-  }
-
-  public void setOpenid(String openid) {
-    this.openid = openid;
-  }
-
-  public String getIsSubscribe() {
-    return this.isSubscribe;
-  }
-
-  public void setIsSubscribe(String isSubscribe) {
-    this.isSubscribe = isSubscribe;
-  }
-
-  public String getTradeType() {
-    return this.tradeType;
-  }
-
-  public void setTradeType(String tradeType) {
-    this.tradeType = tradeType;
-  }
-
-  public String getTradeState() {
-    return this.tradeState;
-  }
-
-  public void setTradeState(String tradeState) {
-    this.tradeState = tradeState;
-  }
-
-  public String getBankType() {
-    return this.bankType;
-  }
-
-  public void setBankType(String bankType) {
-    this.bankType = bankType;
-  }
-
-  public Integer getTotalFee() {
-    return this.totalFee;
-  }
-
-  public void setTotalFee(Integer totalFee) {
-    this.totalFee = totalFee;
-  }
-
-  public Integer getSettlementTotalFee() {
-    return this.settlementTotalFee;
-  }
-
-  public void setSettlementTotalFee(Integer settlementTotalFee) {
-    this.settlementTotalFee = settlementTotalFee;
-  }
-
-  public String getFeeType() {
-    return this.feeType;
-  }
-
-  public void setFeeType(String feeType) {
-    this.feeType = feeType;
-  }
-
-  public Integer getCashFee() {
-    return this.cashFee;
-  }
-
-  public void setCashFee(Integer cashFee) {
-    this.cashFee = cashFee;
-  }
-
-  public String getCashFeeType() {
-    return this.cashFeeType;
-  }
-
-  public void setCashFeeType(String cashFeeType) {
-    this.cashFeeType = cashFeeType;
-  }
-
-  public Integer getCouponFee() {
-    return this.couponFee;
-  }
-
-  public void setCouponFee(Integer couponFee) {
-    this.couponFee = couponFee;
-  }
-
-  public Integer getCouponCount() {
-    return this.couponCount;
-  }
-
-  public void setCouponCount(Integer couponCount) {
-    this.couponCount = couponCount;
-  }
-
-  public List<Coupon> getCoupons() {
-    return this.coupons;
-  }
-
-  public void setCoupons(List<Coupon> coupons) {
-    this.coupons = coupons;
-  }
-
-  public String getTransactionId() {
-    return this.transactionId;
-  }
-
-  public void setTransactionId(String transactionId) {
-    this.transactionId = transactionId;
-  }
-
-  public String getOutTradeNo() {
-    return this.outTradeNo;
-  }
-
-  public void setOutTradeNo(String outTradeNo) {
-    this.outTradeNo = outTradeNo;
-  }
-
-  public String getAttach() {
-    return this.attach;
-  }
-
-  public void setAttach(String attach) {
-    this.attach = attach;
-  }
-
-  public String getTimeEnd() {
-    return this.timeEnd;
-  }
-
-  public void setTimeEnd(String timeEnd) {
-    this.timeEnd = timeEnd;
-  }
-
-  public String getTradeStateDesc() {
-    return this.tradeStateDesc;
-  }
-
-  public void setTradeStateDesc(String tradeStateDesc) {
-    this.tradeStateDesc = tradeStateDesc;
-  }
-
   /**
-   * 通过xml组装coupons属性内容
+   * 通过xml组装coupons属性内容.
    */
   public void composeCoupons() {
     if (this.couponCount != null && this.couponCount > 0) {
@@ -402,9 +335,46 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
     }
   }
 
-  public static class Coupon {
+  /**
+   * 从XML结构中加载额外的熟悉
+   *
+   * @param d Document
+   */
+  @Override
+  protected void loadXML(Document d) {
+    promotionDetail = readXMLString(d, "promotion_detail");
+    deviceInfo = readXMLString(d, "device_info");
+    openid = readXMLString(d, "openid");
+    isSubscribe = readXMLString(d, "is_subscribe");
+    tradeType = readXMLString(d, "trade_type");
+    tradeState = readXMLString(d, "trade_state");
+    bankType = readXMLString(d, "bank_type");
+    totalFee = readXMLInteger(d, "total_fee");
+    settlementTotalFee = readXMLInteger(d, "settlement_total_fee");
+    feeType = readXMLString(d, "fee_type");
+    cashFee = readXMLInteger(d, "cash_fee");
+    cashFeeType = readXMLString(d, "cash_fee_type");
+    couponFee = readXMLInteger(d, "coupon_fee");
+    couponCount = readXMLInteger(d, "coupon_count");
+    this.transactionId = readXMLString(d, "transaction_id");
+    this.outTradeNo = readXMLString(d, "out_trade_no");
+    this.attach = readXMLString(d, "attach");
+    this.timeEnd = readXMLString(d, "time_end");
+    this.tradeStateDesc = readXMLString(d, "trade_state_desc");
+  }
+
+  /**
+   * The type Coupon.
+   */
+  @Data
+  @Builder(builderMethodName = "newBuilder")
+  @AllArgsConstructor
+  public static class Coupon implements Serializable {
+    private static final long serialVersionUID = -954000582332155081L;
+
     /**
-     * <pre>代金券类型
+     * <pre>
+     * 代金券类型.
      * coupon_type_$n
      * 否
      * String
@@ -417,7 +387,8 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
     private String couponType;
 
     /**
-     * <pre>代金券ID
+     * <pre>
+     * 代金券ID.
      * coupon_id_$n
      * 否
      * String(20)
@@ -428,7 +399,8 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
     private String couponId;
 
     /**
-     * <pre>单个代金券支付金额
+     * <pre>
+     * 单个代金券支付金额.
      * coupon_fee_$n
      * 否
      * Int
@@ -438,35 +410,6 @@ public class WxPayOrderQueryResult extends WxPayBaseResult {
      */
     private Integer couponFee;
 
-    public Coupon(String couponType, String couponId, Integer couponFee) {
-      this.couponType = couponType;
-      this.couponId = couponId;
-      this.couponFee = couponFee;
-    }
-
-    public String getCouponType() {
-      return this.couponType;
-    }
-
-    public void setCouponType(String couponType) {
-      this.couponType = couponType;
-    }
-
-    public String getCouponId() {
-      return this.couponId;
-    }
-
-    public void setCouponId(String couponId) {
-      this.couponId = couponId;
-    }
-
-    public Integer getCouponFee() {
-      return this.couponFee;
-    }
-
-    public void setCouponFee(Integer couponFee) {
-      this.couponFee = couponFee;
-    }
-
   }
+
 }

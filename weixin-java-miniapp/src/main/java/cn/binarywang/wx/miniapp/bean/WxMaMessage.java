@@ -7,7 +7,7 @@ import cn.binarywang.wx.miniapp.util.xml.XStreamTransformer;
 import com.google.gson.annotations.SerializedName;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
-import me.chanjar.weixin.common.util.ToStringUtils;
+import lombok.Data;
 import me.chanjar.weixin.common.util.xml.XStreamCDataConverter;
 import org.apache.commons.io.IOUtils;
 
@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
 @XStreamAlias("xml")
+@Data
 public class WxMaMessage implements Serializable {
   private static final long serialVersionUID = -3586245291677274914L;
 
@@ -40,15 +41,18 @@ public class WxMaMessage implements Serializable {
 
   @SerializedName("CreateTime")
   @XStreamAlias("CreateTime")
-  @XStreamConverter(value = XStreamCDataConverter.class)
   private Integer createTime;
+
+  @SerializedName("MsgType")
+  @XStreamAlias("MsgType")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String msgType;
 
   @SerializedName("MsgDataFormat")
   @XStreamAlias("MsgDataFormat")
   @XStreamConverter(value = XStreamCDataConverter.class)
-  private String msgType;
+  private String msgDataFormat;
 
-  // 文本消息
   @SerializedName("Content")
   @XStreamAlias("Content")
   @XStreamConverter(value = XStreamCDataConverter.class)
@@ -56,10 +60,8 @@ public class WxMaMessage implements Serializable {
 
   @SerializedName("MsgId")
   @XStreamAlias("MsgId")
-  @XStreamConverter(value = XStreamCDataConverter.class)
   private Long msgId;
 
-  // 图片消息
   @SerializedName("PicUrl")
   @XStreamAlias("PicUrl")
   @XStreamConverter(value = XStreamCDataConverter.class)
@@ -70,16 +72,77 @@ public class WxMaMessage implements Serializable {
   @XStreamConverter(value = XStreamCDataConverter.class)
   private String mediaId;
 
-  // 事件消息
   @SerializedName("Event")
   @XStreamAlias("Event")
   @XStreamConverter(value = XStreamCDataConverter.class)
   private String event;
 
+  @SerializedName("Title")
+  @XStreamAlias("Title")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String title;
+
+  @SerializedName("AppId")
+  @XStreamAlias("AppId")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String appId;
+
+  @SerializedName("PagePath")
+  @XStreamAlias("PagePath")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String pagePath;
+
+  @SerializedName("ThumbUrl")
+  @XStreamAlias("ThumbUrl")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String thumbUrl;
+
+  @SerializedName("ThumbMediaId")
+  @XStreamAlias("ThumbMediaId")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String thumbMediaId;
+
   @SerializedName("SessionFrom")
   @XStreamAlias("SessionFrom")
   @XStreamConverter(value = XStreamCDataConverter.class)
   private String sessionFrom;
+
+  /**
+   * 以下是异步校验图片/音频是否含有违法违规内容的异步检测结果推送报文中的参数
+   */
+  @SerializedName("isrisky")
+  @XStreamAlias("isrisky")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String isRisky;
+
+  @SerializedName("extra_info_json")
+  @XStreamAlias("extra_info_json")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String extraInfoJson;
+
+  @SerializedName("appid")
+  @XStreamAlias("appid")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String appid;
+
+  @SerializedName("trace_id")
+  @XStreamAlias("trace_id")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String traceId;
+
+  @SerializedName("status_code")
+  @XStreamAlias("status_code")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String statusCode;
+
+  @SerializedName("Scene")
+  @XStreamAlias("Scene")
+  private Integer scene;
+
+  @SerializedName("Query")
+  @XStreamAlias("Query")
+  @XStreamConverter(value = XStreamCDataConverter.class)
+  private String query;
 
   public static WxMaMessage fromXml(String xml) {
     return XStreamTransformer.fromXml(WxMaMessage.class, xml);
@@ -90,7 +153,7 @@ public class WxMaMessage implements Serializable {
   }
 
   /**
-   * 从加密字符串转换
+   * 从加密字符串转换.
    *
    * @param encryptedXml 密文
    * @param wxMaConfig   配置存储器对象
@@ -139,98 +202,11 @@ public class WxMaMessage implements Serializable {
 
   @Override
   public String toString() {
-    return ToStringUtils.toSimpleString(this);
+    return this.toJson();
   }
 
   public String toJson() {
     return WxMaGsonBuilder.create().toJson(this);
   }
 
-  public String getToUser() {
-    return toUser;
-  }
-
-  public void setToUser(String toUser) {
-    this.toUser = toUser;
-  }
-
-  public String getFromUser() {
-    return fromUser;
-  }
-
-  public void setFromUser(String fromUser) {
-    this.fromUser = fromUser;
-  }
-
-  public Integer getCreateTime() {
-    return createTime;
-  }
-
-  public void setCreateTime(Integer createTime) {
-    this.createTime = createTime;
-  }
-
-  public String getMsgType() {
-    return msgType;
-  }
-
-  public void setMsgType(String msgType) {
-    this.msgType = msgType;
-  }
-
-  public String getContent() {
-    return content;
-  }
-
-  public void setContent(String content) {
-    this.content = content;
-  }
-
-  public Long getMsgId() {
-    return msgId;
-  }
-
-  public void setMsgId(Long msgId) {
-    this.msgId = msgId;
-  }
-
-  public String getPicUrl() {
-    return picUrl;
-  }
-
-  public void setPicUrl(String picUrl) {
-    this.picUrl = picUrl;
-  }
-
-  public String getMediaId() {
-    return mediaId;
-  }
-
-  public void setMediaId(String mediaId) {
-    this.mediaId = mediaId;
-  }
-
-  public String getEvent() {
-    return event;
-  }
-
-  public void setEvent(String event) {
-    this.event = event;
-  }
-
-  public String getSessionFrom() {
-    return sessionFrom;
-  }
-
-  public void setSessionFrom(String sessionFrom) {
-    this.sessionFrom = sessionFrom;
-  }
-
-  public String getEncrypt() {
-    return encrypt;
-  }
-
-  public void setEncrypt(String encrypt) {
-    this.encrypt = encrypt;
-  }
 }

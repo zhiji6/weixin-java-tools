@@ -1,16 +1,24 @@
 package com.github.binarywang.wxpay.bean.result;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import org.w3c.dom.Document;
 
 /**
  * <pre>
  * 关闭订单结果对象类
  * Created by Binary Wang on 2016-10-27.
- * @author <a href="https://github.com/binarywang">binarywang(Binary Wang)</a>
  * </pre>
+ *
+ * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 @XStreamAlias("xml")
-public class WxPayOrderCloseResult extends WxPayBaseResult {
+public class WxPayOrderCloseResult extends BaseWxPayResult {
 
   /**
    * 业务结果描述
@@ -18,11 +26,14 @@ public class WxPayOrderCloseResult extends WxPayBaseResult {
   @XStreamAlias("result_msg")
   private String resultMsg;
 
-  public String getResultMsg() {
-    return this.resultMsg;
+  /**
+   * 从XML结构中加载额外的熟悉
+   *
+   * @param d Document
+   */
+  @Override
+  protected void loadXML(Document d) {
+    resultMsg = readXMLString(d, "result_msg");
   }
 
-  public void setResultMsg(String resultMsg) {
-    this.resultMsg = resultMsg;
-  }
 }

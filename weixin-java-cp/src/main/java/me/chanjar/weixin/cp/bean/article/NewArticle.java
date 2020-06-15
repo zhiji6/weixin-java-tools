@@ -1,5 +1,12 @@
 package me.chanjar.weixin.cp.bean.article;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+
 /**
  * <pre>
  *  Created by BinaryWang on 2017/3/27.
@@ -7,43 +14,27 @@ package me.chanjar.weixin.cp.bean.article;
  *
  * @author Binary Wang
  */
-public class NewArticle {
-
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class NewArticle implements Serializable {
+  private static final long serialVersionUID = 4087852055781140659L;
+  /**
+   * 标题，不超过128个字节，超过会自动截断
+   */
   private String title;
+  /**
+   * 描述，不超过512个字节，超过会自动截断
+   */
   private String description;
+  /**
+   * 点击后跳转的链接。
+   */
   private String url;
+  /**
+   * 图文消息的图片链接，支持JPG、PNG格式，较好的效果为大图1068*455，小图150*150。
+   */
   private String picUrl;
-
-  public String getTitle() {
-    return this.title;
-  }
-
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  public String getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public String getUrl() {
-    return this.url;
-  }
-
-  public void setUrl(String url) {
-    this.url = url;
-  }
-
-  public String getPicUrl() {
-    return this.picUrl;
-  }
-
-  public void setPicUrl(String picUrl) {
-    this.picUrl = picUrl;
-  }
 
 }

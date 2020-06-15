@@ -1,5 +1,12 @@
 package me.chanjar.weixin.cp.bean.article;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+
 /**
  * <pre>
  *  Created by BinaryWang on 2017/3/27.
@@ -7,134 +14,41 @@ package me.chanjar.weixin.cp.bean.article;
  *
  * @author Binary Wang
  */
-public class MpnewsArticle {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(builderMethodName = "newBuilder")
+public class MpnewsArticle implements Serializable {
+  private static final long serialVersionUID = 6985871812170756481L;
+
+  /**
+   * 标题，不超过128个字节，超过会自动截断
+   */
   private String title;
+  /**
+   * 图文消息缩略图的media_id, 可以通过素材管理接口获得。此处thumb_media_id即上传接口返回的media_id
+   */
   private String thumbMediaId;
+  /**
+   * 图文消息的作者，不超过64个字节
+   */
   private String author;
+  /**
+   * 图文消息点击“阅读原文”之后的页面链接
+   */
   private String contentSourceUrl;
+  /**
+   * 图文消息的内容，支持html标签，不超过666 K个字节
+   */
   private String content;
+  /**
+   * 图文消息的描述，不超过512个字节，超过会自动截断
+   */
   private String digest;
+  /**
+   * 可能已经废弃了，官方文档里已经看不到了
+   */
+  @Deprecated
   private String showCoverPic;
 
-  private MpnewsArticle(Builder builder) {
-    setTitle(builder.title);
-    setThumbMediaId(builder.thumbMediaId);
-    setAuthor(builder.author);
-    setContentSourceUrl(builder.contentSourceUrl);
-    setContent(builder.content);
-    setDigest(builder.digest);
-    setShowCoverPic(builder.showCoverPic);
-  }
-
-  public static Builder newBuilder() {
-    return new Builder();
-  }
-
-  public String getTitle() {
-    return title;
-  }
-
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  public String getThumbMediaId() {
-    return thumbMediaId;
-  }
-
-  public void setThumbMediaId(String thumbMediaId) {
-    this.thumbMediaId = thumbMediaId;
-  }
-
-  public String getAuthor() {
-    return author;
-  }
-
-  public void setAuthor(String author) {
-    this.author = author;
-  }
-
-  public String getContentSourceUrl() {
-    return contentSourceUrl;
-  }
-
-  public void setContentSourceUrl(String contentSourceUrl) {
-    this.contentSourceUrl = contentSourceUrl;
-  }
-
-  public String getContent() {
-    return content;
-  }
-
-  public void setContent(String content) {
-    this.content = content;
-  }
-
-  public String getDigest() {
-    return digest;
-  }
-
-  public void setDigest(String digest) {
-    this.digest = digest;
-  }
-
-  public String getShowCoverPic() {
-    return showCoverPic;
-  }
-
-  public void setShowCoverPic(String showCoverPic) {
-    this.showCoverPic = showCoverPic;
-  }
-
-  public static final class Builder {
-    private String title;
-    private String thumbMediaId;
-    private String author;
-    private String contentSourceUrl;
-    private String content;
-    private String digest;
-    private String showCoverPic;
-
-    private Builder() {
-    }
-
-    public Builder title(String title) {
-      this.title = title;
-      return this;
-    }
-
-    public Builder thumbMediaId(String thumbMediaId) {
-      this.thumbMediaId = thumbMediaId;
-      return this;
-    }
-
-    public Builder author(String author) {
-      this.author = author;
-      return this;
-    }
-
-    public Builder contentSourceUrl(String contentSourceUrl) {
-      this.contentSourceUrl = contentSourceUrl;
-      return this;
-    }
-
-    public Builder content(String content) {
-      this.content = content;
-      return this;
-    }
-
-    public Builder digest(String digest) {
-      this.digest = digest;
-      return this;
-    }
-
-    public Builder showCoverPic(String showCoverPic) {
-      this.showCoverPic = showCoverPic;
-      return this;
-    }
-
-    public MpnewsArticle build() {
-      return new MpnewsArticle(this);
-    }
-  }
 }

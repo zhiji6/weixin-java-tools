@@ -1,23 +1,31 @@
 package me.chanjar.weixin.mp.api.impl;
 
+import me.chanjar.weixin.common.WxType;
 import me.chanjar.weixin.common.bean.WxAccessToken;
-import me.chanjar.weixin.common.bean.result.WxError;
-import me.chanjar.weixin.common.exception.WxErrorException;
+import me.chanjar.weixin.common.error.WxError;
+import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.http.HttpType;
 import me.chanjar.weixin.common.util.http.okhttp.OkHttpProxyInfo;
-import me.chanjar.weixin.mp.api.WxMpConfigStorage;
-import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.config.WxMpConfigStorage;
 import okhttp3.*;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 
-public class WxMpServiceOkHttpImpl extends AbstractWxMpServiceImpl<ConnectionPool, OkHttpProxyInfo> {
-  private ConnectionPool httpClient;
+import static me.chanjar.weixin.mp.enums.WxMpApiUrl.Other.GET_ACCESS_TOKEN_URL;
+
+/**
+ * okhttp实现.
+ *
+ * @author someone
+ */
+public class WxMpServiceOkHttpImpl extends BaseWxMpServiceImpl<OkHttpClient, OkHttpProxyInfo> {
+  private OkHttpClient httpClient;
   private OkHttpProxyInfo httpProxy;
 
   @Override
-  public ConnectionPool getRequestHttpClient() {
+  public OkHttpClient getRequestHttpClient() {
     return httpClient;
   }
 
@@ -33,64 +41,56 @@ public class WxMpServiceOkHttpImpl extends AbstractWxMpServiceImpl<ConnectionPoo
 
   @Override
   public String getAccessToken(boolean forceRefresh) throws WxErrorException {
-    Lock lock = this.getWxMpConfigStorage().getAccessTokenLock();
+    final WxMpConfigStorage config = this.getWxMpConfigStorage();
+    if (!config.isAccessTokenExpired() && !forceRefresh) {
+      return config.getAccessToken();
+    }
+
+    Lock lock = config.getAccessTokenLock();
+    lock.lock();
     try {
-      lock.lock();
-
-      if (forceRefresh) {
-        this.getWxMpConfigStorage().expireAccessToken();
+      if (!config.isAccessTokenExpired() && !forceRefresh) {
+        return config.getAccessToken();
       }
+      String url = String.format(GET_ACCESS_TOKEN_URL.getUrl(config), config.getAppId(), config.getSecret());
 
-      if (this.getWxMpConfigStorage().isAccessTokenExpired()) {
-        String url = String.format(WxMpService.GET_ACCESS_TOKEN_URL,
-          this.getWxMpConfigStorage().getAppId(), this.getWxMpConfigStorage().getSecret());
-
-        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder().connectionPool(httpClient);
-        //设置代理
-        if (httpProxy != null) {
-          clientBuilder.proxy(getRequestHttpProxy().getProxy());
-        }
-        //设置授权
-        clientBuilder.authenticator(new Authenticator() {
-          @Override
-          public Request authenticate(Route route, Response response) throws IOException {
-            String credential = Credentials.basic(httpProxy.getProxyUsername(), httpProxy.getProxyPassword());
-            return response.request().newBuilder()
-              .header("Authorization", credential)
-              .build();
-          }
-        });
-        //得到httpClient
-        OkHttpClient client = clientBuilder.build();
-
-        Request request = new Request.Builder().url(url).get().build();
-        Response response = client.newCall(request).execute();
-        String resultContent = response.body().string();
-        WxError error = WxError.fromJson(resultContent);
-        if (error.getErrorCode() != 0) {
-          throw new WxErrorException(error);
-        }
-        WxAccessToken accessToken = WxAccessToken.fromJson(resultContent);
-        this.getWxMpConfigStorage().updateAccessToken(accessToken.getAccessToken(),
-          accessToken.getExpiresIn());
-      }
+      Request request = new Request.Builder().url(url).get().build();
+      Response response = getRequestHttpClient().newCall(request).execute();
+      return this.extractAccessToken(Objects.requireNonNull(response.body()).string());
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     } finally {
       lock.unlock();
     }
-    return this.getWxMpConfigStorage().getAccessToken();
   }
 
   @Override
   public void initHttp() {
-    WxMpConfigStorage configStorage = this.getWxMpConfigStorage();
-
-    if (configStorage.getHttpProxyHost() != null && configStorage.getHttpProxyPort() > 0) {
-      httpProxy = new OkHttpProxyInfo(OkHttpProxyInfo.ProxyType.SOCKS5, configStorage.getHttpProxyHost(), configStorage.getHttpProxyPort(), configStorage.getHttpProxyUsername(), configStorage.getHttpProxyPassword());
+    WxMpConfigStorage wxMpConfigStorage = getWxMpConfigStorage();
+    //设置代理
+    if (wxMpConfigStorage.getHttpProxyHost() != null && wxMpConfigStorage.getHttpProxyPort() > 0) {
+      httpProxy = OkHttpProxyInfo.httpProxy(wxMpConfigStorage.getHttpProxyHost(),
+        wxMpConfigStorage.getHttpProxyPort(),
+        wxMpConfigStorage.getHttpProxyUsername(),
+        wxMpConfigStorage.getHttpProxyPassword());
     }
 
-    httpClient = new ConnectionPool();
+    OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+    if (httpProxy != null) {
+      clientBuilder.proxy(getRequestHttpProxy().getProxy());
+
+      //设置授权
+      clientBuilder.authenticator(new Authenticator() {
+        @Override
+        public Request authenticate(Route route, Response response) throws IOException {
+          String credential = Credentials.basic(httpProxy.getProxyUsername(), httpProxy.getProxyPassword());
+          return response.request().newBuilder()
+            .header("Authorization", credential)
+            .build();
+        }
+      });
+    }
+    httpClient = clientBuilder.build();
   }
 
 }

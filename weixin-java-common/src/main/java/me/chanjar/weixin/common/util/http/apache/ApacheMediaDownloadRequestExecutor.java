@@ -1,10 +1,13 @@
 package me.chanjar.weixin.common.util.http.apache;
 
-import me.chanjar.weixin.common.bean.result.WxError;
-import me.chanjar.weixin.common.exception.WxErrorException;
+import me.chanjar.weixin.common.WxType;
+import me.chanjar.weixin.common.error.WxError;
+import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.fs.FileUtils;
-import me.chanjar.weixin.common.util.http.MediaDownloadRequestExecutor;
+import me.chanjar.weixin.common.util.http.BaseMediaDownloadRequestExecutor;
+import me.chanjar.weixin.common.util.http.HttpResponseProxy;
 import me.chanjar.weixin.common.util.http.RequestHttp;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -17,21 +20,20 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
- * Created by ecoolper on 2017/5/5.
+ * .
+ *
+ * @author ecoolper
+ * @date 2017/5/5
  */
-public class ApacheMediaDownloadRequestExecutor extends MediaDownloadRequestExecutor<CloseableHttpClient, HttpHost> {
-
-
+public class ApacheMediaDownloadRequestExecutor extends BaseMediaDownloadRequestExecutor<CloseableHttpClient, HttpHost> {
   public ApacheMediaDownloadRequestExecutor(RequestHttp requestHttp, File tmpDirFile) {
     super(requestHttp, tmpDirFile);
   }
 
   @Override
-  public File execute(String uri, String queryParam) throws WxErrorException, IOException {
+  public File execute(String uri, String queryParam, WxType wxType) throws WxErrorException, IOException {
     if (queryParam != null) {
       if (uri.indexOf('?') == -1) {
         uri += '?';
@@ -46,42 +48,32 @@ public class ApacheMediaDownloadRequestExecutor extends MediaDownloadRequestExec
     }
 
     try (CloseableHttpResponse response = requestHttp.getRequestHttpClient().execute(httpGet);
-         InputStream inputStream = InputStreamResponseHandler.INSTANCE
-           .handleResponse(response)) {
+         InputStream inputStream = InputStreamResponseHandler.INSTANCE.handleResponse(response)) {
       Header[] contentTypeHeader = response.getHeaders("Content-Type");
       if (contentTypeHeader != null && contentTypeHeader.length > 0) {
         if (contentTypeHeader[0].getValue().startsWith(ContentType.APPLICATION_JSON.getMimeType())) {
           // application/json; encoding=utf-8 下载媒体文件出错
           String responseContent = Utf8ResponseHandler.INSTANCE.handleResponse(response);
-          throw new WxErrorException(WxError.fromJson(responseContent));
+          throw new WxErrorException(WxError.fromJson(responseContent, wxType));
         }
       }
 
-      String fileName = getFileName(response);
+      String fileName = new HttpResponseProxy(response).getFileName();
       if (StringUtils.isBlank(fileName)) {
-        return null;
+        fileName = String.valueOf(System.currentTimeMillis());
       }
 
-      String[] nameAndExt = fileName.split("\\.");
-      return FileUtils.createTmpFile(inputStream, nameAndExt[0], nameAndExt[1], super.tmpDirFile);
+      String baseName = FilenameUtils.getBaseName(fileName);
+      if (StringUtils.isBlank(fileName) || baseName.length() < 3) {
+        baseName = String.valueOf(System.currentTimeMillis());
+      }
+
+      return FileUtils.createTmpFile(inputStream, baseName, FilenameUtils.getExtension(fileName),
+        super.tmpDirFile);
 
     } finally {
       httpGet.releaseConnection();
     }
-  }
-
-  private String getFileName(CloseableHttpResponse response) throws WxErrorException {
-    Header[] contentDispositionHeader = response.getHeaders("Content-disposition");
-    if (contentDispositionHeader == null || contentDispositionHeader.length == 0) {
-      throw new WxErrorException(WxError.newBuilder().setErrorMsg("无法获取到文件名").build());
-    }
-
-    Pattern p = Pattern.compile(".*filename=\"(.*)\"");
-    Matcher m = p.matcher(contentDispositionHeader[0].getValue());
-    if (m.matches()) {
-      return m.group(1);
-    }
-    throw new WxErrorException(WxError.newBuilder().setErrorMsg("无法获取到文件名").build());
   }
 
 }

@@ -1,21 +1,24 @@
 package me.chanjar.weixin.mp.bean.datacube;
 
-import com.google.gson.JsonParser;
+import java.util.List;
+
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import me.chanjar.weixin.mp.util.json.WxMpGsonBuilder;
-
-import java.util.List;
 
 /**
  * 图文分析数据接口返回结果对象
+ * <p>
+ * Created by Binary Wang on 2016/8/24.
  *
- * @author <a href="https://github.com/binarywang">binarywang(Binary Wang)</a>
- *         Created by Binary Wang on 2016/8/24.
+ * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class WxDataCubeArticleResult extends WxDataCubeBaseResult {
-
-  private static final JsonParser JSON_PARSER = new JsonParser();
+  private static final long serialVersionUID = -9222452497954511765L;
 
   /**
    * ref_hour
@@ -105,119 +108,17 @@ public class WxDataCubeArticleResult extends WxDataCubeBaseResult {
 
   /**
    * user_source
-   * 在获取图文阅读分时数据时才有该字段，代表用户从哪里进入来阅读该图文。0:会话;1.好友;2.朋友圈;3.腾讯微博;4.历史消息页;5.其他
+   * 在获取图文统计数据、图文阅读分时数据时才有该字段，代表用户从哪里进入来阅读该图文。
+   * 99999999.全部；0:会话;1.好友;2.朋友圈;3.腾讯微博;4.历史消息页;5.其他;6.看一看;7.搜一搜；
    */
   @SerializedName("user_source")
   private Integer userSource;
 
   public static List<WxDataCubeArticleResult> fromJson(String json) {
-    return WxMpGsonBuilder.INSTANCE.create().fromJson(
+    return WxMpGsonBuilder.create().fromJson(
       JSON_PARSER.parse(json).getAsJsonObject().get("list"),
       new TypeToken<List<WxDataCubeArticleResult>>() {
       }.getType());
   }
 
-  public Integer getRefHour() {
-    return this.refHour;
-  }
-
-  public void setRefHour(Integer refHour) {
-    this.refHour = refHour;
-  }
-
-  public String getMsgId() {
-    return this.msgId;
-  }
-
-  public void setMsgId(String msgId) {
-    this.msgId = msgId;
-  }
-
-  public String getTitle() {
-    return this.title;
-  }
-
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  public Integer getIntPageReadUser() {
-    return this.intPageReadUser;
-  }
-
-  public void setIntPageReadUser(Integer intPageReadUser) {
-    this.intPageReadUser = intPageReadUser;
-  }
-
-  public Integer getIntPageReadCount() {
-    return this.intPageReadCount;
-  }
-
-  public void setIntPageReadCount(Integer intPageReadCount) {
-    this.intPageReadCount = intPageReadCount;
-  }
-
-  public Integer getOriPageReadUser() {
-    return this.oriPageReadUser;
-  }
-
-  public void setOriPageReadUser(Integer oriPageReadUser) {
-    this.oriPageReadUser = oriPageReadUser;
-  }
-
-  public Integer getOriPageReadCount() {
-    return this.oriPageReadCount;
-  }
-
-  public void setOriPageReadCount(Integer oriPageReadCount) {
-    this.oriPageReadCount = oriPageReadCount;
-  }
-
-  public Integer getShareScene() {
-    return this.shareScene;
-  }
-
-  public void setShareScene(Integer shareScene) {
-    this.shareScene = shareScene;
-  }
-
-  public Integer getShareUser() {
-    return this.shareUser;
-  }
-
-  public void setShareUser(Integer shareUser) {
-    this.shareUser = shareUser;
-  }
-
-  public Integer getShareCount() {
-    return this.shareCount;
-  }
-
-  public void setShareCount(Integer shareCount) {
-    this.shareCount = shareCount;
-  }
-
-  public Integer getAddToFavUser() {
-    return this.addToFavUser;
-  }
-
-  public void setAddToFavUser(Integer addToFavUser) {
-    this.addToFavUser = addToFavUser;
-  }
-
-  public Integer getAddToFavCount() {
-    return this.addToFavCount;
-  }
-
-  public void setAddToFavCount(Integer addToFavCount) {
-    this.addToFavCount = addToFavCount;
-  }
-
-  public Integer getUserSource() {
-    return this.userSource;
-  }
-
-  public void setUserSource(Integer userSource) {
-    this.userSource = userSource;
-  }
 }

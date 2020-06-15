@@ -2,8 +2,9 @@ package me.chanjar.weixin.mp.bean.message;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
+import lombok.Data;
 import me.chanjar.weixin.common.util.xml.XStreamCDataConverter;
-import me.chanjar.weixin.mp.api.WxMpConfigStorage;
+import me.chanjar.weixin.mp.config.WxMpConfigStorage;
 import me.chanjar.weixin.mp.builder.outxml.*;
 import me.chanjar.weixin.mp.util.crypto.WxMpCryptUtil;
 import me.chanjar.weixin.mp.util.xml.XStreamTransformer;
@@ -11,8 +12,8 @@ import me.chanjar.weixin.mp.util.xml.XStreamTransformer;
 import java.io.Serializable;
 
 @XStreamAlias("xml")
+@Data
 public abstract class WxMpXmlOutMessage implements Serializable {
-
   private static final long serialVersionUID = -381382011286216263L;
 
   @XStreamAlias("ToUserName")
@@ -79,36 +80,11 @@ public abstract class WxMpXmlOutMessage implements Serializable {
     return new TransferCustomerServiceBuilder();
   }
 
-  public String getToUserName() {
-    return this.toUserName;
-  }
-
-  public void setToUserName(String toUserName) {
-    this.toUserName = toUserName;
-  }
-
-  public String getFromUserName() {
-    return this.fromUserName;
-  }
-
-  public void setFromUserName(String fromUserName) {
-    this.fromUserName = fromUserName;
-  }
-
-  public Long getCreateTime() {
-    return this.createTime;
-  }
-
-  public void setCreateTime(Long createTime) {
-    this.createTime = createTime;
-  }
-
-  public String getMsgType() {
-    return this.msgType;
-  }
-
-  public void setMsgType(String msgType) {
-    this.msgType = msgType;
+  /**
+   * 获得设备消息builder
+   */
+  public static DeviceBuilder DEVICE() {
+      return new DeviceBuilder();
   }
 
   @SuppressWarnings("unchecked")

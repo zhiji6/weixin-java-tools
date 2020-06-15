@@ -1,5 +1,9 @@
 package me.chanjar.weixin.mp.bean.kefu;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.mp.builder.kefu.*;
 import me.chanjar.weixin.mp.util.json.WxMpGsonBuilder;
 
@@ -8,10 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 客服消息
+ * 客服消息.
  *
  * @author chanjarster
  */
+@Data
 public class WxMpKefuMessage implements Serializable {
   private static final long serialVersionUID = -9196732086954365246L;
 
@@ -27,224 +32,130 @@ public class WxMpKefuMessage implements Serializable {
   private String kfAccount;
   private String cardId;
   private String mpNewsMediaId;
+  private String miniProgramAppId;
+  private String miniProgramPagePath;
+  private String headContent;
+  private String tailContent;
   private List<WxArticle> articles = new ArrayList<>();
 
   /**
-   * 获得文本消息builder
+   * 菜单消息里的菜单内容.
+   */
+  private List<MsgMenu> msgMenus = new ArrayList<>();
+
+  /**
+   * 获得文本消息builder.
    */
   public static TextBuilder TEXT() {
     return new TextBuilder();
   }
 
   /**
-   * 获得图片消息builder
+   * 获得图片消息builder.
    */
   public static ImageBuilder IMAGE() {
     return new ImageBuilder();
   }
 
   /**
-   * 获得语音消息builder
+   * 获得语音消息builder.
    */
   public static VoiceBuilder VOICE() {
     return new VoiceBuilder();
   }
 
   /**
-   * 获得视频消息builder
+   * 获得视频消息builder.
    */
   public static VideoBuilder VIDEO() {
     return new VideoBuilder();
   }
 
   /**
-   * 获得音乐消息builder
+   * 获得音乐消息builder.
    */
   public static MusicBuilder MUSIC() {
     return new MusicBuilder();
   }
 
   /**
-   * 获得图文消息（点击跳转到外链）builder
+   * 获得图文消息（点击跳转到外链）builder.
    */
   public static NewsBuilder NEWS() {
     return new NewsBuilder();
   }
 
   /**
-   * 获得图文消息（点击跳转到图文消息页面）builder
+   * 获得图文消息（点击跳转到图文消息页面）builder.
    */
   public static MpNewsBuilder MPNEWS() {
     return new MpNewsBuilder();
   }
 
   /**
-   * 获得卡券消息builder
+   * 获得卡券消息builder.
    */
   public static WxCardBuilder WXCARD() {
     return new WxCardBuilder();
   }
 
-  public String getToUser() {
-    return this.toUser;
+  /**
+   * 获得菜单消息builder.
+   */
+  public static WxMsgMenuBuilder MSGMENU() {
+    return new WxMsgMenuBuilder();
   }
 
-  public void setToUser(String toUser) {
-    this.toUser = toUser;
-  }
-
-  public String getMsgType() {
-    return this.msgType;
+  /**
+   * 小程序卡片.
+   */
+  public static MiniProgramPageBuilder MINIPROGRAMPAGE() {
+    return new MiniProgramPageBuilder();
   }
 
   /**
    * <pre>
    * 请使用
-   * {@link me.chanjar.weixin.common.api.WxConsts#CUSTOM_MSG_TEXT}
-   * {@link me.chanjar.weixin.common.api.WxConsts#CUSTOM_MSG_IMAGE}
-   * {@link me.chanjar.weixin.common.api.WxConsts#CUSTOM_MSG_VOICE}
-   * {@link me.chanjar.weixin.common.api.WxConsts#CUSTOM_MSG_MUSIC}
-   * {@link me.chanjar.weixin.common.api.WxConsts#CUSTOM_MSG_VIDEO}
-   * {@link me.chanjar.weixin.common.api.WxConsts#CUSTOM_MSG_NEWS}
-   * {@link me.chanjar.weixin.common.api.WxConsts#CUSTOM_MSG_MPNEWS}
-   * {@link me.chanjar.weixin.common.api.WxConsts#CUSTOM_MSG_WXCARD}
+   * {@link WxConsts.KefuMsgType#TEXT}
+   * {@link WxConsts.KefuMsgType#IMAGE}
+   * {@link WxConsts.KefuMsgType#VOICE}
+   * {@link WxConsts.KefuMsgType#MUSIC}
+   * {@link WxConsts.KefuMsgType#VIDEO}
+   * {@link WxConsts.KefuMsgType#NEWS}
+   * {@link WxConsts.KefuMsgType#MPNEWS}
+   * {@link WxConsts.KefuMsgType#WXCARD}
+   * {@link WxConsts.KefuMsgType#MINIPROGRAMPAGE}
+   * {@link WxConsts.KefuMsgType#TASKCARD}
+   * {@link WxConsts.KefuMsgType#MSGMENU}
    * </pre>
-   *
-   * @param msgType
    */
   public void setMsgType(String msgType) {
     this.msgType = msgType;
   }
 
-  public String getMpNewsMediaId() {
-    return this.mpNewsMediaId;
-  }
-
-  public void setMpNewsMediaId(String mpNewsMediaId) {
-    this.mpNewsMediaId = mpNewsMediaId;
-  }
-
-  public String getContent() {
-    return this.content;
-  }
-
-  public void setContent(String content) {
-    this.content = content;
-  }
-
-  public String getMediaId() {
-    return this.mediaId;
-  }
-
-  public void setMediaId(String mediaId) {
-    this.mediaId = mediaId;
-  }
-
-  public String getThumbMediaId() {
-    return this.thumbMediaId;
-  }
-
-  public void setThumbMediaId(String thumbMediaId) {
-    this.thumbMediaId = thumbMediaId;
-  }
-
-  public String getTitle() {
-    return this.title;
-  }
-
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  public String getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public String getMusicUrl() {
-    return this.musicUrl;
-  }
-
-  public void setMusicUrl(String musicUrl) {
-    this.musicUrl = musicUrl;
-  }
-
-  public String getHqMusicUrl() {
-    return this.hqMusicUrl;
-  }
-
-  public void setHqMusicUrl(String hqMusicUrl) {
-    this.hqMusicUrl = hqMusicUrl;
-  }
-
-  public String getCardId() {
-    return this.cardId;
-  }
-
-  public void setCardId(String cardId) {
-    this.cardId = cardId;
-  }
-
-  public List<WxArticle> getArticles() {
-    return this.articles;
-  }
-
-  public void setArticles(List<WxArticle> articles) {
-    this.articles = articles;
-  }
-
   public String toJson() {
-    return WxMpGsonBuilder.INSTANCE.create().toJson(this);
+    return WxMpGsonBuilder.create().toJson(this);
   }
 
-  public String getKfAccount() {
-    return this.kfAccount;
-  }
+  @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class WxArticle implements Serializable {
+    private static final long serialVersionUID = 5145137235440507379L;
 
-  public void setKfAccount(String kfAccount) {
-    this.kfAccount = kfAccount;
-  }
-
-  public static class WxArticle {
     private String title;
     private String description;
     private String url;
     private String picUrl;
+  }
 
-    public String getTitle() {
-      return this.title;
-    }
+  @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class MsgMenu implements Serializable {
+    private static final long serialVersionUID = 7020769047598378839L;
 
-    public void setTitle(String title) {
-      this.title = title;
-    }
-
-    public String getDescription() {
-      return this.description;
-    }
-
-    public void setDescription(String description) {
-      this.description = description;
-    }
-
-    public String getUrl() {
-      return this.url;
-    }
-
-    public void setUrl(String url) {
-      this.url = url;
-    }
-
-    public String getPicUrl() {
-      return this.picUrl;
-    }
-
-    public void setPicUrl(String picUrl) {
-      this.picUrl = picUrl;
-    }
-
+    private String id;
+    private String content;
   }
 }
